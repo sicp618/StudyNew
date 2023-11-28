@@ -4,19 +4,19 @@ package handlers
 import (
     "github.com/gin-gonic/gin"
     "github.com/jinzhu/gorm"
-    "github.com/gomodule/redigo/redis"
     "github.com/gorilla/sessions"
+    "github.com/go-redis/redis"
     "net/http"
     "sicp618.com/hotpot/account/models"
 )
 
 type Handler struct {
     DB    *gorm.DB
-    Pool  *redis.Pool
+    Pool  *redis.Client
     Store *sessions.CookieStore
 }
 
-func NewHandler(db *gorm.DB, pool *redis.Pool, store *sessions.CookieStore) *Handler {
+func NewHandler(db *gorm.DB, pool *redis.Client, store *sessions.CookieStore) *Handler {
     return &Handler{DB: db, Pool: pool, Store: store}
 }
 
