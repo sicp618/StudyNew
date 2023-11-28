@@ -9,16 +9,25 @@ import (
     _ "github.com/jinzhu/gorm/dialects/postgres"
     "github.com/spf13/viper"
     "sicp618.com/hotpot/account/handlers"
-    _ "sicp618.com/hotpot/account/models"
+    "sicp618.com/hotpot/account/models"
     _ "sicp618.com/hotpot/account/store"
 )
+
+func readConfig() {
+    viper.SetConfigName("config")
+    viper.AddConfigPath(".")
+    err := viper.ReadInConfig()
+    if err != nil {
+        panic(fmt.Errorf("fatal error config file: %s", err))
+    }
+}
 
 func initDB() *gorm.DB {
     viper.SetConfigName("config")
     viper.AddConfigPath(".")
     err := viper.ReadInConfig()
     if err != nil {
-        panic(fmt.Errorf("Fatal error config file: %s", err))
+        panic(fmt.Errorf("fatal error config file: %s", err))
     }
 
     dsn := viper.GetString("dsn")
@@ -27,6 +36,9 @@ func initDB() *gorm.DB {
     if err != nil {
         panic(fmt.Sprintln("failed to connect database", err))
     }
+
+	db.AutoMigrate(&models.User{})
+
     return db
 }
 
@@ -64,12 +76,13 @@ func initService(db *gorm.DB, client *redis.Client) *gin.Engine {
 }
 
 func main() {
+	readConfig()
     db := initDB()
     defer db.Close()
 
     client := initRedis()
+	defer client.Close()
 
     r := initService(db, client)
-
     r.Run() 
 }

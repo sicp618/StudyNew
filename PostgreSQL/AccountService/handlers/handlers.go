@@ -27,6 +27,11 @@ func (h *Handler) Register(c *gin.Context) {
         return
     }
 
+    if err := user.IsValidUsername(); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
     if err := h.DB.Create(&user).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return

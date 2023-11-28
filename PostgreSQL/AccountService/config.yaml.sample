@@ -1,0 +1,7 @@
+# config.yaml
+dsn: postgres://your_username:your_password@localhost:5432/hotpot?sslmode=disable
+
+redis:
+  address: localhost:6379
+  password: ""
+  db: 0
