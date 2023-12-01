@@ -3,10 +3,10 @@ package main
 import (
     "fmt"
     "github.com/gin-gonic/gin"
-    "github.com/jinzhu/gorm"
+	"gorm.io/gorm"    
+	"gorm.io/driver/postgres"    
     "github.com/go-redis/redis"
     "github.com/gorilla/sessions"
-    _ "github.com/jinzhu/gorm/dialects/postgres"
     "github.com/spf13/viper"
     "sicp618.com/hotpot/account/handlers"
     "sicp618.com/hotpot/account/models"
@@ -23,16 +23,8 @@ func readConfig() {
 }
 
 func initDB() *gorm.DB {
-    viper.SetConfigName("config")
-    viper.AddConfigPath(".")
-    err := viper.ReadInConfig()
-    if err != nil {
-        panic(fmt.Errorf("fatal error config file: %s", err))
-    }
-
     dsn := viper.GetString("dsn")
-
-    db, err := gorm.Open("postgres", dsn)
+    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
         panic(fmt.Sprintln("failed to connect database", err))
     }
@@ -78,7 +70,6 @@ func initService(db *gorm.DB, client *redis.Client) *gin.Engine {
 func main() {
 	readConfig()
     db := initDB()
-    defer db.Close()
 
     client := initRedis()
 	defer client.Close()

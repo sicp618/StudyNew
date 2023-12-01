@@ -3,7 +3,7 @@ package handlers
 
 import (
     "github.com/gin-gonic/gin"
-    "github.com/jinzhu/gorm"
+	"gorm.io/gorm"
     "github.com/gorilla/sessions"
     "github.com/go-redis/redis"
     "net/http"

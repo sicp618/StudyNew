@@ -12,7 +12,7 @@ import (
 type User struct {
 	gorm.Model
 	Username string `gorm:"unique;not null" json:"username"`
-	Password string `json:"-"`
+	Password string `json:"password"`
 	Email    string `gorm:"unique;not null" json:"email"`
 	Avatar   string `json:"avatar"`
 	Bio      string `json:"bio"`
