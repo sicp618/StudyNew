@@ -1,16 +1,18 @@
 package main
 
 import (
-    "fmt"
-    "github.com/gin-gonic/gin"
-	"gorm.io/gorm"    
-	"gorm.io/driver/postgres"    
-    "github.com/go-redis/redis"
-    "github.com/gorilla/sessions"
-    "github.com/spf13/viper"
-    "sicp618.com/hotpot/account/handlers"
-    "sicp618.com/hotpot/account/models"
-    _ "sicp618.com/hotpot/account/store"
+	"context"
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/sessions"
+	"github.com/redis/go-redis/v9"
+	"github.com/spf13/viper"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"sicp618.com/hotpot/account/handlers"
+	"sicp618.com/hotpot/account/models"
+	_ "sicp618.com/hotpot/account/store"
 )
 
 func readConfig() {
@@ -45,7 +47,7 @@ func initRedis() *redis.Client {
         DB:       redisDB,
     })
 
-    pong, err := client.Ping().Result()
+    pong, err := client.Ping(context.Background()).Result()
     if err != nil {
         panic(err)
     } else {

@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -14,11 +15,15 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
+	"github.com/go-redis/redismock/v9"
+	"github.com/redis/go-redis/v9"
 	"sicp618.com/hotpot/account/models"
 )
 
 var db *gorm.DB
 var store *sessions.CookieStore
+var redisClient *redis.Client
+var redisMock redismock.ClientMock
 
 func init() {
     var err error
@@ -31,6 +36,9 @@ func init() {
 	store = sessions.NewCookieStore([]byte("something-very-secret"))
 
 	gin.SetMode(gin.TestMode)
+
+	redisClient, redisMock = redismock.NewClientMock()
+	redisMock.Regexp().ExpectSet(".*", ".*", 0).SetVal("OK")
 }
 
 func TestRegister(t *testing.T) {
@@ -55,7 +63,7 @@ func TestLogin(t *testing.T) {
 	user := &models.User{Username: "testuser1", Password: "testpass", Email: "test1@test.com"}
 	db.Create(user)
 
-	h := &Handler{DB: db, Store: store}
+	h := &Handler{DB: db, Store: store, Pool: redisClient}
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -81,7 +89,7 @@ func TestUser(t *testing.T) {
 	user := &models.User{Username: "testuser2", Password: "test123456", Email: "testuser2@email.com"}
 	db.Create(user)
 
-	h := &Handler{DB: db}
+	h := &Handler{DB: db, Store: store, Pool: redisClient}
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -90,8 +98,11 @@ func TestUser(t *testing.T) {
 	c.Params = []gin.Param{{Key: "username", Value: "testuser2"}}
 	c.Request.Header.Set("Content-Type", "application/json")
 
-	h.User(c)
+	cookie := &http.Cookie{Name: "session_token", Value: fmt.Sprint(user.ID)}
+	c.Request.AddCookie(cookie)
+	redisMock.Regexp().ExpectGet(".*").SetVal(fmt.Sprintf("%d", user.ID))
 
+	h.User(c)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var returnedUser models.User
