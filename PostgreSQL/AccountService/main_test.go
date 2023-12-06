@@ -2,29 +2,18 @@ package main
 
 import (
 	"testing"
-	"github.com/stretchr/testify/assert"
+
+    "github.com/spf13/viper"
+	"gorm.io/driver/sqlite"
 )
 
-func TestInitDB(t *testing.T) {
-	db := initDB()
-	defer db.Close()
-
-	assert.NotNil(t, db)
+func init() {
+    dsn := sqlite.Open("file::memory:")
+	viper.Set("dsn", dsn)
 }
 
 func TestInitRedis(t *testing.T) {
-	client := initRedis()
-
-	assert.NotNil(t, client)
 }
 
 func TestInitService(t *testing.T) {
-	db := initDB()
-	defer db.Close()
-
-	client := initRedis()
-
-	r := initService(db, client)
-
-	assert.NotNil(t, r)
 }

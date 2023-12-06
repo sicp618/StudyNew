@@ -36,8 +36,9 @@ func (h *Handler) Register(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
+    user.Password = ""
 
-    c.JSON(http.StatusOK, gin.H{"data": user})
+    c.JSON(http.StatusOK, user)
 }
 
 func (h *Handler) Login(c *gin.Context) {
@@ -52,10 +53,26 @@ func (h *Handler) Login(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid email or password"})
         return
     }
+    foundUser.Password = ""
 
     session, _ := h.Store.Get(c.Request, "session-name")
     session.Values["user_id"] = foundUser.ID
     session.Save(c.Request, c.Writer)
 
-    c.JSON(http.StatusOK, gin.H{"data": foundUser})
+    c.JSON(http.StatusOK, foundUser)
 }
+
+// return user info
+func (h *Handler) User(c *gin.Context) {
+    var user models.User
+    username := c.Param("username")
+
+    if err := h.DB.Where("username = ?", username).First(&user).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+
+    user.Password = ""
+
+    c.JSON(http.StatusOK, user)
+} 

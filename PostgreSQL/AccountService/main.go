@@ -63,6 +63,7 @@ func initService(db *gorm.DB, client *redis.Client) *gin.Engine {
     
     r.POST("/api/login", handlers.Login)
     r.POST("/api/register", handlers.Register)
+    r.GET("/api/user/:username", handlers.User)
 
     return r
 }
