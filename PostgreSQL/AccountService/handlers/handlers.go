@@ -79,28 +79,48 @@ func (h *Handler) Login(c *gin.Context) {
 
 // return user info
 func (h *Handler) User(c *gin.Context) {
-    session, err := c.Request.Cookie("session_token")
-    if err != nil {
-        // c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-        c.JSON(http.StatusUnauthorized, gin.H{"error": c.Request.Cookies()})
-        return
-    }
-
-    // Get the user ID from Redis
-    userID, err := h.Pool.Get(c, session.Value).Result()
-    if err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "No valid session"})
-        return
-    }
-
-    // Get the user from the database
-    var user models.User
-    if err := h.DB.Where("id = ?", userID).First(&user).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-        return
-    }
-
-    user.Password = ""
+	currentUser, _ := c.Get("current_user")
+	username := c.Param("username")
+	var user models.User
+	if currentUser.(models.User).Username != username {
+		if err := h.DB.Where("username = ?", username).First(&user); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+	} else {
+		user = currentUser.(models.User)
+	}
+	user.Password = ""
 
     c.JSON(http.StatusOK, user)
+}
+
+func (h *Handler) AuthMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        session, err := c.Request.Cookie("session_token")
+        if err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "No valid session"})
+            c.Abort()
+            return
+        }
+
+        userID, err := h.Pool.Get(c, session.Value).Result()
+        if err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "No valid session"})
+            c.Abort()
+            return
+        }
+
+        var user models.User
+        if err := h.DB.Where("id = ?", userID).First(&user).Error; err != nil {
+            c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+            c.Abort()
+            return
+        }
+
+        user.Password = ""
+        c.Set("current_user", user)
+
+        c.Next()
+    }
 }

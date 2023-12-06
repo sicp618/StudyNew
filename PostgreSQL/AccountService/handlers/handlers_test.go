@@ -102,6 +102,8 @@ func TestUser(t *testing.T) {
 	c.Request.AddCookie(cookie)
 	redisMock.Regexp().ExpectGet(".*").SetVal(fmt.Sprintf("%d", user.ID))
 
+	c.Set("current_user", *user)
+
 	h.User(c)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -110,4 +112,48 @@ func TestUser(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "testuser2", returnedUser.Username)
 	assert.Equal(t, "", returnedUser.Password)
+}
+
+func TestAuthMiddleware(t *testing.T) {
+	h := &Handler{DB: db, Store: store, Pool: redisClient}
+    router := gin.Default()
+    router.Use(h.AuthMiddleware())
+    router.GET("/", func(c *gin.Context) {
+        c.String(http.StatusOK, "Hello, World!")
+    })
+
+    req, err := http.NewRequest("GET", "/", nil)
+	assert.Nil(t, err)
+
+	// no session token
+    w := httptest.NewRecorder()
+    router.ServeHTTP(w, req)
+    assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// invalid session token
+	w = httptest.NewRecorder()
+	redisMock.ClearExpect()
+	redisMock.ExpectGet("124").SetVal("100")
+	cookie := &http.Cookie{Name: "session_token", Value: "123"}
+	req.AddCookie(cookie)
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// user not found
+	w = httptest.NewRecorder()
+	redisMock.ClearExpect()
+	redisMock.ExpectGet("123").SetVal("100")
+	req.AddCookie(cookie)
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+
+	// normal
+	user := &models.User{Username: "testuser5", Password: "test123456", Email: "testuser5@email.com"}
+	h.DB.Create(user)
+	w = httptest.NewRecorder()
+	redisMock.ClearExpect()
+	redisMock.ExpectGet("123").SetVal(fmt.Sprint(user.ID))
+	req.AddCookie(cookie)
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
