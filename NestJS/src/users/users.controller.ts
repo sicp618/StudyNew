@@ -6,7 +6,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from './users.module';
+import { User } from './user.schema';
 
 @Controller('api/users')
 export class UsersController {

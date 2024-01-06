@@ -1,17 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { User } from './users.module';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User, UserDocument } from './user.schema';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [];
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async register(user: User): Promise<User> {
-    const userExists = this.users.find(u => u.username === user.username);
+    const userExists = await this.userModel.findOne({ username: user.username });
     if (userExists) {
       throw new HttpException('User already exists', HttpStatus.CONFLICT);
     }
 
-    this.users.push(user);
-    return user;
+    const createdUser = new this.userModel(user);
+    return createdUser.save();
   }
 }

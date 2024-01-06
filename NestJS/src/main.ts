@@ -3,7 +3,11 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  await app.listen(process.env.PORT || 3000);
+  try {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    await app.listen(process.env.PORT || 3000);
+  } catch (error) {
+    console.error('error during application start', error);
+  }
 }
 bootstrap();
