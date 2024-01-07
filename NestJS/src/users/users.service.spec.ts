@@ -1,5 +1,5 @@
-import { UsersService } from './users.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { UsersService } from './users.service';
 
 describe('UsersService', () => {
   let service: UsersService;

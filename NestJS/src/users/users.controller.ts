@@ -13,8 +13,9 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post('register')
-  async register(@Body('') user: User): Promise<{ user: User }> {
+  async register(@Body('user') user: User): Promise<{ user: User }> {
     try {
+      console.log('register input:', user);
       const registeredUser = await this.usersService.register(user);
       return { user: registeredUser };
     } catch (error) {
