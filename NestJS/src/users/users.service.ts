@@ -13,7 +13,7 @@ export class UsersService {
       throw new HttpException('User already exists', HttpStatus.CONFLICT);
     }
 
-    const createdUser = new this.userModel(user);
+    const createdUser = await this.userModel.create(user);
     return createdUser.save();
   }
 }
