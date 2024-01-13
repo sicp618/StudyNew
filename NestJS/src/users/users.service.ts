@@ -31,6 +31,7 @@ export class UsersService {
     if (!passwordMatches) {
       throw new HttpException('Password is incorrect', HttpStatus.UNAUTHORIZED);
     }
+
     return userExists;
   }
 }
