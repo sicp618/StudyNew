@@ -25,4 +25,18 @@ export class UsersController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @Post('login')
+  async login(@Body('user') user: User): Promise<{ user: User }> {
+    try {
+      console.log('login input:', user);
+      const loggedInUser = await this.usersService.login(user);
+      return { user: loggedInUser };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
