@@ -13,9 +13,12 @@ import { User } from './user.schema';
 import { Response } from 'express';
 import { SessionService } from '../session/session.service';
 
-@Controller('api/users')
+@Controller('api')
 export class UsersController {
-  constructor(private usersService: UsersService, private sessionService: SessionService) {}
+  constructor(
+    private usersService: UsersService,
+    private sessionService: SessionService
+  ) {}
 
   @Post('register')
   async register(@Body('user') user: User): Promise<{ user: User }> {
@@ -56,7 +59,10 @@ export class UsersController {
   }
 
   @Post('logout')
-  async logout(@Req() req, @Res({ passthrough: true }) res: Response): Promise<void> {
+  async logout(
+    @Req() req,
+    @Res({ passthrough: true }) res: Response
+  ): Promise<void> {
     try {
       await this.sessionService.deleteSession(req.cookies.nid);
       res.clearCookie('nid');
