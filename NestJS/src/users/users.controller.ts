@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
   Post,
@@ -46,6 +47,20 @@ export class UsersController {
         maxAge: 1000 * 60 * 60 * 24 * 7,
       });
       return { user: loggedInUser };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('logout')
+  async logout(@Req() req, @Res({ passthrough: true }) res: Response): Promise<void> {
+    try {
+      await this.sessionService.deleteSession(req.cookies.nid);
+      res.clearCookie('nid');
+      res.status(200).send();
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
