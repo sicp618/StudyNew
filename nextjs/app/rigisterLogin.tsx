@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import Router from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const registerUrl = `${process.env.NEXT_PUBLIC_API_HOST}/api/register`;
@@ -11,14 +11,16 @@ type User = {
   username: string;
   password: string;
   email: string;
-  id: number;
 };
 
-
 export default function Counter() {
-  const [user, setUser] = useState<User | null>(null);
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [user, setUser] = useState<User>({
+    username: "",
+    password: "",
+    email: "",
+  });
+
+  const router = useRouter();
 
   const registerAction = async () => {
     const data = {
@@ -42,9 +44,9 @@ export default function Counter() {
   const loginAction = async () => {
     const loginData = {
       user: {
-        username: username,
-        password: password,
-        email: "",
+        username: user.username,
+        password: user.password,
+        email: user.email,
         id: 0,
       },
     };
@@ -54,7 +56,7 @@ export default function Counter() {
         console.log("res", res);
         setUser(res.data.user);
 
-        Router.push("/dashboard");
+        router.push("/home");
       })
       .catch((error) => {
         console.log("error", error);
@@ -71,22 +73,22 @@ export default function Counter() {
         <input
           type="text"
           placeholder="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          class="input input-bordered w-full max-w-xs my-1"
+          value={user.username}
+          onChange={(e) => setUser({ ...user, username: e.target.value })}
+          className="input input-bordered w-full max-w-xs my-1"
         />
         <input
           type="password"
           placeholder="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          class="input input-bordered w-full max-w-xs my-1"
+          value={user.password}
+          onChange={(e) => setUser({ ...user, password: e.target.value })}
+          className="input input-bordered w-full max-w-xs my-1"
         />
-        <button class="btn btn-primary w-full my-1" onClick={loginAction}>
+        <button className="btn btn-primary w-full my-1" onClick={loginAction}>
           Login
         </button>
-        <div class="form-control my-1">
-          <label class="hover" onClick={registerAction}>
+        <div className="form-control my-1">
+          <label className="hover" onClick={registerAction}>
             register
           </label>
         </div>
