@@ -1,9 +1,38 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
+
+const BB = 1
 
 func main() {
-	f3()
+	mp := make(map[string][]int)
+	mp["a"] = []int{1, 2, 3}
+	if v, ok := mp["a"]; ok {
+		v[0] = 100
+		fmt.Println(v)
+	} else {
+		fmt.Println("not found")
+	}
+	j1 := make([]int, 5)
+	fmt.Println(j1)
+	is := []int32{3, 2, 1}
+	f4(is)
+	fmt.Println(is)
+	a := 3
+	switch a {
+		case 1:
+		case 2:
+			
+	}
+}
+
+func f4(is []int32) {
+	sort.Slice(is, func(i, j int) bool {
+		return is[i] < is[j]
+	})
 }
 
 func f3() {
