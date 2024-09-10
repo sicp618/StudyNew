@@ -3,9 +3,10 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
-const registerUrl = `${process.env.NEXT_PUBLIC_API_HOST}/api/register`;
-const loginUrl = `${process.env.NEXT_PUBLIC_API_HOST}/api/login`;
+const registerUrl = `${process.env.NEXT_PUBLIC_API_HOST}/api/users/register`;
+const loginUrl = `${process.env.NEXT_PUBLIC_API_HOST}/api/users/login`;
 
 type User = {
   username: string;
@@ -56,10 +57,11 @@ export default function Counter() {
         console.log("res", res);
         setUser(res.data.user);
 
+        toast.success("注册成功");
         router.push("/home");
       })
       .catch((error) => {
-        console.log("error", error);
+        toast.error(`注册失败, ${error}`);
       });
   };
 
