@@ -7,6 +7,8 @@ import (
 	"net"
 
 	pb "github.com/sicp618/interview/proto/user"
+    "google.golang.org/grpc/codes"
+    "google.golang.org/grpc/status"
 	"google.golang.org/grpc"
 )
 
@@ -15,10 +17,16 @@ type Server struct {
 }
 
 func (s *Server) GetUser(ctx context.Context, in *pb.UserRequest) (*pb.UserResponse, error) {
-	return &pb.UserResponse{
-		Code: 1,
-		Message: "no find",
-	}, nil
+	if in.Id == 1 {
+		return &pb.UserResponse {
+			Data: &pb.UserInfo {
+				Id: 1,
+				Name: "jack",
+			},
+		}, nil
+	}
+
+	return nil, status.Errorf(codes.NotFound, "no find")
 }
 
 

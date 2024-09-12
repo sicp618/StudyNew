@@ -13,9 +13,7 @@ message UserRequest {
 }
 
 message UserResponse {
-    int32 code = 1;
-    string message = 2;
-    UserInfo data = 3;
+  UserInfo data = 1;
 }
 
 message UserInfo {
