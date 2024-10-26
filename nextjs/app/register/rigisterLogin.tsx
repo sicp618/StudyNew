@@ -26,9 +26,9 @@ export default function Counter() {
   const registerAction = async () => {
     const data = {
       user: {
-        username: "user1",
-        password: "123456",
-        email: "user2@mail",
+        username: "",
+        password: "",
+        email: "",
         id: 0,
       },
     };
